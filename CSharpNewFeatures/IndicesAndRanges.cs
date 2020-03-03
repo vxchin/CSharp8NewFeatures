@@ -53,19 +53,6 @@ namespace CSharpNewFeatures
             PrintWords(text);
         }
 
-        public static void Demo5() // Why exclusive and ^0 end of collection
-        {
-            var numbers = Enumerable.Range(0, 100).ToArray();
-            int x = 12;
-            int y = 25;
-            int z = 36;
-        }
-
-        public static void Demo6()
-        {
-
-        }
-
         static void PrintWords(string[] words)
         {
             foreach (var word in words)

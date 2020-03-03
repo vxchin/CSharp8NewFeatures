@@ -19,8 +19,6 @@ namespace CSharpNewFeatures
             Run(IndicesAndRanges.Demo2);
             Run(IndicesAndRanges.Demo3);
             Run(IndicesAndRanges.Demo4);
-            Run(IndicesAndRanges.Demo5);
-            Run(IndicesAndRanges.Demo6);
 
             Run(UsingStatement.Demo);
 
