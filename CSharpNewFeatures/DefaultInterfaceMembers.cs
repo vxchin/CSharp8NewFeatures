@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CSharpNewFeatures
@@ -8,44 +9,68 @@ namespace CSharpNewFeatures
     {
         public static void Demo()
         {
-            var lc = LoggerFactory.GetLogger(LoggerType.Console);
-            lc.Log("Hello");
+            Trace.Listeners.Add(new ConsoleTraceListener());
 
-            var ld = LoggerFactory.GetLogger(LoggerType.Database);
-            ld.Log("Hello");
+            var logger = new ConsoleLogger();
+            logger.Log(LogLevel.Error, "ERROR MESSAGE!");
+            // Compile Error!
+            //logger.LogInformation("INFORMATION MESSAGE!");
+
+            ILogger consoleLogger = new ConsoleLogger();
+            consoleLogger.LogWarning("WARNING MESSAGE!");
+
+            ILogger traceLogger = new TraceLogger();
+            traceLogger.LogInformation("INFORMATION MESSAGE!");
+        }
+
+        enum LogLevel
+        {
+            Information,
+            Warning,
+            Error
         }
 
         interface ILogger
         {
-            void Log(string msg);
+            void Log(LogLevel level, string message);
+
+            private string Format(string format, string[] args) => String.Format(format, args);
+
+            protected void Log(LogLevel level, string format, params string[] args) =>
+
+                Log(level, Format(format, args));
+
+            public void LogInformation(string message) => Log(LogLevel.Information, message);
+
+            void LogWarning(string message) => Log(LogLevel.Warning, message);
+
+            void LogError(string message) => Log(LogLevel.Error, message);
         }
 
-        interface IConsoleLogger : ILogger
+        class ConsoleLogger : ILogger
         {
-            void ILogger.Log(string msg) => Console.WriteLine(msg);
+            public void Log(LogLevel level, string message) => Console.WriteLine($"{level}: {message}");
         }
 
-        class ConsoleLogger : IConsoleLogger { }
-
-        interface IDatabaseLogger : ILogger
+        class TraceLogger : ILogger
         {
-            void ILogger.Log(string msg) => Console.WriteLine($"'{msg}' inserted in DB.");
-        }
-
-        class DatabaseLogger : IDatabaseLogger { }
-
-        // ... Several other Loggers ...
-
-        enum LoggerType { Console, Database, /* ... */ }
-
-        static class LoggerFactory
-        {
-            public static ILogger GetLogger(LoggerType ltype) => ltype switch
+            public void Log(LogLevel level, string message)
             {
-                LoggerType.Console => new ConsoleLogger(),
-                LoggerType.Database => new DatabaseLogger(),
-                _ => throw new InvalidOperationException("Logger doesn't exist...")
-            };
+                switch (level)
+                {
+                    case LogLevel.Information:
+                        Trace.TraceInformation(message);
+                        break;
+
+                    case LogLevel.Warning:
+                        Trace.TraceWarning(message);
+                        break;
+
+                    case LogLevel.Error:
+                        Trace.TraceError(message);
+                        break;
+                }
+            }
         }
     }
 }
